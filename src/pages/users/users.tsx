@@ -2,12 +2,64 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../component/Layouts/MainLayout";
 import { db } from "../../firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, doc, onSnapshot, updateDoc } from "firebase/firestore";
 import UserData from "../../interface/users_interface";
+import { Modal, Row } from "react-bootstrap";
+import showToast from "../../component/Toast/toast";
 
 const Users: React.FC = () => {
   const [usersData, setUsersData] = useState<UserData[]>([]);
   const [usersFilterData, setUsersFilterData] = useState<UserData[]>([]);
+  const [show, setShow] = useState(false);
+  const [approve, setApprove] = useState(false);
+  const [id, setId] = useState("");
+  const handleClose = () => {
+    setId("");
+    setShow(false);
+  };
+  const handleShow = (id: string) => {
+    setId(id);
+    setShow(true);
+  };
+  const handleApprove = (id: string) => {
+    setId(id);
+    setApprove(true);
+  };
+  const handleCloseApprove = () => {
+    setId("");
+    setApprove(false);
+  };
+  const onSubmitApprove = () => {
+    const userCollection = collection(db, "users");
+    const docRef = doc(userCollection, id);
+    updateDoc(docRef, {
+      status_aktivasi: "ACTIVE",
+    })
+      .then(() => {
+        showToast("Berhasil diaprove");
+        handleCloseApprove();
+      })
+      .catch((error) => {
+        // The document probably doesn't exist.
+        console.error("Error updating document: ", error);
+      });
+  };
+  const onSubmitReject = () => {
+    const userCollection = collection(db, "users");
+    const docRef = doc(userCollection, id);
+    updateDoc(docRef, {
+      status_aktivasi: "REJECT",
+    })
+      .then(() => {
+        showToast("Berhasil Direject");
+        handleCloseApprove();
+      })
+      .catch((error) => {
+        // The document probably doesn't exist.
+        console.error("Error updating document: ", error);
+      });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -17,10 +69,15 @@ const Users: React.FC = () => {
         // Listen for changes in the "users" collection
         onSnapshot(userCollection, (snapshot) => {
           const userData: UserData[] = snapshot.docs
-            .filter((doc) => doc.data().status_aktivasi === false)
+            .filter(
+              (doc) =>
+                doc.data().status_aktivasi !== "ACTIVE" &&
+                doc.data().status_aktivasi !== "REJECT"
+            )
             .map((doc) => {
               const data = doc.data();
               return {
+                id: doc.id,
                 alamat: data.alamat,
                 created_at: data.created_at,
                 foto_diri: data.foto_diri,
@@ -118,15 +175,63 @@ const Users: React.FC = () => {
                           <td>{user.kecamatan}</td>
                           <td>{user.alamat}</td>
                           <td>
-                            <button className="btn btn-success mr-2">
+                            <button
+                              className="btn-outline-primary mr-2 font-weight-bold"
+                              onClick={() => handleApprove(user.id)}
+                            >
                               Approve
                             </button>
-                            <button className="btn btn-danger">Reject</button>
+                            <button
+                              className="btn-outline-danger font-weight-bold"
+                              onClick={() => handleShow(user.id)}
+                            >
+                              Reject
+                            </button>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
+                  <Modal show={show} onHide={handleClose} animation={false}>
+                    <Modal.Header closeButton></Modal.Header>
+                    <Modal.Body className="text-center">
+                      Apakah anda yakin ingin reject data ini?
+                      <Row className="mt-3  justify-content-center">
+                        <button
+                          className="btn btn-secondary mr-2 font-weight-bold text-white"
+                          onClick={handleClose}
+                        >
+                          Batalkan
+                        </button>
+                        <button
+                          className="btn btn-danger font-weight-bold"
+                          onClick={onSubmitReject}
+                        >
+                          Reject
+                        </button>
+                      </Row>
+                    </Modal.Body>
+                  </Modal>
+                  <Modal show={approve} onHide={handleClose} animation={false}>
+                    <Modal.Header closeButton></Modal.Header>
+                    <Modal.Body className="text-center">
+                      Apakah anda yakin ingin approve data ini?
+                      <Row className="mt-3  justify-content-center">
+                        <button
+                          className="btn btn-secondary mr-2 font-weight-bold text-white"
+                          onClick={handleCloseApprove}
+                        >
+                          Batalkan
+                        </button>
+                        <button
+                          onClick={onSubmitApprove}
+                          className="btn btn-success font-weight-bold"
+                        >
+                          Approve
+                        </button>
+                      </Row>
+                    </Modal.Body>
+                  </Modal>
                 </div>
               ) : (
                 <div className="text-center">Data tidak tersedia</div>

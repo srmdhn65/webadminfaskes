@@ -2,12 +2,36 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../component/Layouts/MainLayout";
 import { db } from "../../firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 import UserData from "../../interface/users_interface";
+import ApproveModal from "../../component/Modal/CustomModalConfirmation";
+import showToast from "../../component/Toast/toast";
 
 const UsersActive: React.FC = () => {
   const [usersData, setUsersData] = useState<UserData[]>([]);
   const [usersFilterData, setUsersFilterData] = useState<UserData[]>([]);
+  const [idUser, setidUser] = useState("");
+  const [showDelete, setShowDelete] = useState(false);
+
+  const handleShowDelete = (id: string) => {
+    setidUser(id);
+    setShowDelete(true);
+  };
+  const handleCloseDelete = () => {
+    setidUser("");
+    setShowDelete(false);
+  };
+  const handleSubmit = async () => {
+    try {
+      const faskesDocRef = doc(db, "users", idUser);
+      await deleteDoc(faskesDocRef);
+      showToast("Data berhasil dihapus");
+      setShowDelete(false);
+    } catch (error) {
+      setShowDelete(false);
+      console.error("Error deleting document:");
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -17,10 +41,11 @@ const UsersActive: React.FC = () => {
         // Listen for changes in the "users" collection
         onSnapshot(userCollection, (snapshot) => {
           const userData: UserData[] = snapshot.docs
-            .filter((doc) => doc.data().status_aktivasi === true)
+            .filter((doc) => doc.data().status_aktivasi === "ACTIVE")
             .map((doc) => {
               const data = doc.data();
               return {
+                id: doc.id,
                 alamat: data.alamat,
                 created_at: data.created_at,
                 foto_diri: data.foto_diri,
@@ -81,6 +106,11 @@ const UsersActive: React.FC = () => {
                   placeholder="Search by name..."
                   onChange={(e) => SearchUser(e.target.value)}
                 />
+                <div className="float-right">
+                  <button className="btn btn-primary btn-icon-text">
+                    <i className="ti-plus btn-icon-prepend"></i>Tambah Data{" "}
+                  </button>
+                </div>
               </div>
               {usersData.length > 0 ? (
                 <div className="table-responsive">
@@ -118,15 +148,30 @@ const UsersActive: React.FC = () => {
                           <td>{user.kecamatan}</td>
                           <td>{user.alamat}</td>
                           <td>
-                            <button className="btn btn-success mr-2">
-                              Approve
+                            <button className="btn-outline-primary mr-2 font-weight-bold">
+                              Lihat Data
                             </button>
-                            <button className="btn btn-danger">Reject</button>
+                            <button className="btn-outline-success mr-2 font-weight-bold">
+                              Sunting
+                            </button>
+                            <button
+                              className="btn-outline-danger font-weight-bold"
+                              onClick={() => handleShowDelete(user.id)}
+                            >
+                              Hapus
+                            </button>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
+                  <ApproveModal
+                    show={showDelete}
+                    handleClose={handleCloseDelete}
+                    handleCloseApprove={handleCloseDelete}
+                    onSubmitApprove={handleSubmit}
+                    message={"Apakah anda yakin ingin menghapus data ini?"}
+                  />
                 </div>
               ) : (
                 <div className="text-center">Data tidak tersedia</div>

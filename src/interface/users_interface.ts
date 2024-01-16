@@ -1,4 +1,5 @@
 interface UserData {
+    id: string,
     alamat: string;
     created_at: {
         seconds: number;
@@ -22,7 +23,7 @@ interface UserData {
     nomor_telepon: string;
     peran: string;
     provinsi: string;
-    status_aktivasi: boolean;
+    status_aktivasi: string;
     status_skrining: boolean;
     tanggal_lahir: string;
     token: string;

@@ -7,6 +7,7 @@ interface InputTextProps {
   containerStyle?: string;
   defaultValue?: string;
   placeholder?: string;
+  readonly?: boolean;
   updateFormValue: (arg: { updateType: string; value: string }) => void;
   updateType: string;
 }
@@ -20,6 +21,7 @@ const InputText: React.FC<InputTextProps> = ({
   placeholder,
   updateFormValue,
   updateType,
+  readonly,
 }) => {
   const [value, setValue] = useState<string | undefined>(defaultValue);
 
@@ -42,6 +44,7 @@ const InputText: React.FC<InputTextProps> = ({
         id={labelTitle}
         type={type || "text"}
         value={value || ""}
+        readOnly={readonly || false}
         placeholder={placeholder || ""}
         onChange={(e: ChangeEvent<HTMLInputElement>) =>
           updateInputValue(e.target.value)

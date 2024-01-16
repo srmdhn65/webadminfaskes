@@ -2,10 +2,22 @@
 import React from "react";
 
 const Navbar: React.FC = () => {
+  const Logout = () => {
+    localStorage.removeItem("token");
+    window.location.reload();
+  };
   return (
     <div>
       <nav className="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
-        <div className="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center"></div>
+        <div className="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+          <a className="navbar-brand brand-logo mr-5">
+            <h2 className="font-weight-bold text-center">FASKES PEMILU</h2>
+          </a>
+          <a className="navbar-brand brand-logo-mini">
+            <h2 className="font-weight-bold text-center">FP</h2>
+          </a>
+        </div>
+
         <div className="navbar-menu-wrapper d-flex align-items-center justify-content-end">
           <button
             className="navbar-toggler navbar-toggler align-self-center"
@@ -96,16 +108,11 @@ const Navbar: React.FC = () => {
                   <i className="ti-settings text-primary" />
                   Settings
                 </a>
-                <a className="dropdown-item">
+                <button className="dropdown-item" onClick={Logout}>
                   <i className="ti-power-off text-primary" />
                   Logout
-                </a>
+                </button>
               </div>
-            </li>
-            <li className="nav-item nav-settings d-none d-lg-flex">
-              <a className="nav-link" href="#">
-                <i className="icon-ellipsis" />
-              </a>
             </li>
           </ul>
           <button
@@ -113,7 +120,7 @@ const Navbar: React.FC = () => {
             type="button"
             data-toggle="offcanvas"
           >
-            <span className="icon-menu"></span>
+            {/* <span className="icon-menu"></span> */}
           </button>
         </div>
       </nav>

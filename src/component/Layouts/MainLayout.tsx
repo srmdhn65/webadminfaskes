@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
+import { ToastContainer } from "react-toastify";
 interface MainLayoutAttributes {
   children: React.ReactNode;
+  title?: string;
 }
-const MainLayout: React.FC<MainLayoutAttributes> = ({ children }) => {
+const MainLayout: React.FC<MainLayoutAttributes> = ({ children, title }) => {
+  useEffect(() => {
+    document.title = title ?? "Admin";
+  }, [title]);
   return (
     <div>
       <div className="container-scroller">
@@ -56,6 +61,7 @@ const MainLayout: React.FC<MainLayoutAttributes> = ({ children }) => {
         </div>
         {/* page-body-wrapper ends */}
       </div>
+      <ToastContainer />
     </div>
   );
 };

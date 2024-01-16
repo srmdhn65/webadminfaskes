@@ -31,3 +31,11 @@ export {
     default as UsersActivePage
 }
 from "./users/userActive"
+export {
+    default as FacilityPage
+}
+from "./facility/facility"
+export {
+    default as HealthPage
+}
+from "./health/health"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import SubmenuType from "../../interface/submenutype_interface";
 
 interface SidebarSubmenuProps {
@@ -17,27 +17,30 @@ function SidebarSubmenu({
   path,
   index,
 }: SidebarSubmenuProps) {
-  const isActive = window.location.pathname.startsWith(
-    `/${name.toLowerCase()}`
-  );
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
 
   /** Open Submenu list if path found in routes, this is for directly loading submenu routes first time */
   useEffect(() => {
-    if (submenu.filter((m) => m.path === location.pathname)[0])
+    if (
+      submenu &&
+      submenu.length > 0 &&
+      submenu.some((m) => m.path === location.pathname)
+    ) {
+      console.log(location.pathname);
       setIsExpanded(true);
+    }
   }, [location.pathname, submenu]);
 
   return (
     <>
       <div
-        className={`nav-link ${isActive ? "" : "collapsed"}`}
+        className={`nav-link ${{ isExpanded } ? "active" : ""}  `}
         onClick={() => setIsExpanded(!isExpanded)}
-        data-toggle="collapse"
-        data-target={`#${name.toLowerCase().replace(/\s/g, "-")}`}
+        data-toggle={`#data-${name.toLowerCase().replace(/\s/g, "-")}`}
+        data-target={`#data-${name.toLowerCase().replace(/\s/g, "-")}`}
         aria-expanded={isExpanded}
-        aria-controls={name.toLowerCase().replace(/\s/g, "-")}
+        aria-controls={`data-${name.toLowerCase().replace(/\s/g, "-")}`}
       >
         {icon}
         <i className="menu-icon"></i>
@@ -45,15 +48,19 @@ function SidebarSubmenu({
         <i className="menu-arrow" />
       </div>
       <div
-        className={`collapse ${isExpanded ? "show" : ""}`}
-        id={name.toLowerCase().replace(/\s/g, "-")}
+        className={`${
+          isExpanded
+            ? `#data-${name.toLowerCase().replace(/\s/g, "-")} show`
+            : `collapse`
+        }`}
+        id={`data-${name.toLowerCase().replace(/\s/g, "-")}`}
       >
         <ul className="nav flex-column sub-menu">
-          {submenu.map((m, subIndex) => (
+          {submenu.map((m: SubmenuType, subIndex) => (
             <li key={subIndex} className="nav-item">
-              <Link to={m.path} className="nav-link">
+              <NavLink end to={m.path} className="nav-link">
                 {m.name}
-              </Link>
+              </NavLink>
             </li>
           ))}
         </ul>

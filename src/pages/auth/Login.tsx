@@ -2,6 +2,9 @@ import React, { useState, FormEvent } from "react";
 import InputText from "../../component/Input/inputText";
 import ErrorText from "../../component/Typography/ErrorText";
 import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase";
+import showToast from "../../component/Toast/toast";
 
 interface LoginProps {}
 
@@ -18,7 +21,7 @@ const Login: React.FC<LoginProps> = () => {
   const [loginObj, setLoginObj] =
     useState<typeof INITIAL_LOGIN_OBJ>(INITIAL_LOGIN_OBJ);
 
-  const submitForm = (e: FormEvent) => {
+  const submitForm = async (e: FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
     if (loginObj.emailId.trim() === "")
@@ -27,18 +30,17 @@ const Login: React.FC<LoginProps> = () => {
       return setErrorMessage("Password is required! (use any value)");
     else {
       setLoading(true);
-      navitage("/");
-      // signInWithEmailAndPassword(loginObj.emailId, loginObj.password)
-      //   .then((userCredential) => {
-      //     // Signed in
-      //     const user = userCredential.user;
-      //     console.log(user);
-      //     navitage("/");
-      //   })
-      //   .catch((error) => {});
-      localStorage.setItem("token", "DumyTokenHere");
-      setLoading(false);
-      window.location.href = "/dashboard";
+      signInWithEmailAndPassword(auth, loginObj.emailId, loginObj.password)
+        .then(async (userCredential) => {
+          const user = userCredential.user;
+          localStorage.setItem("token", JSON.stringify(user));
+          showToast("Login Success");
+          setLoading(false);
+          navitage("/");
+        })
+        .catch((error) => {
+          showToast("terjadi kesalahan");
+        });
     }
   };
 
@@ -60,11 +62,11 @@ const Login: React.FC<LoginProps> = () => {
           <div className="row w-100 mx-0">
             <div className="col-lg-4 mx-auto">
               <div className="auth-form-light text-left py-5 px-4 px-sm-5">
-                <div className="brand-logo">
+                {/* <div className="brand-logo">
                   <img src="./assets/images/logo.svg" alt="logo" />
-                </div>
-                <h4>Hello! let's get started</h4>
-                <h6 className="font-weight-light">Sign in to continue.</h6>
+                </div> */}
+                <h4>Silahkan Login</h4>
+                {/* <h6 className="font-weight-light">Sign in to continue.</h6> */}
                 <form onSubmit={(e) => submitForm(e)}>
                   <InputText
                     type="text"
@@ -83,13 +85,11 @@ const Login: React.FC<LoginProps> = () => {
                     labelTitle="Password"
                     updateFormValue={updateFormValue}
                   />
-
                   <ErrorText styleClass="mt-8">{errorMessage}</ErrorText>
                   <button
                     type="submit"
                     className={
-                      "btn mt-2 w-full btn-primary" +
-                      (loading ? " loading" : "")
+                      "btn btn-primary w-full" + (loading ? " loading" : "")
                     }
                   >
                     Login

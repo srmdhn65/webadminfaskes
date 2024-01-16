@@ -8,7 +8,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <div>
-      <nav className="sidebar sidebar-offcanvas active" id="sidebar">
+      <nav className="sidebar sidebar-offcanvas" id="sidebar">
         <ul className="nav">
           {routes.map((route: any, k: number) => (
             <li
